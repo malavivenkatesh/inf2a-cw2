@@ -11,6 +11,25 @@
 # PART D: Semantics for the Query Language.
 
 from agreement import *
+#    S     -> WHO QP QM | WHICH Nom QP QM
+#    QP    -> VP | DO NP T
+#    VP    -> I | T NP | BE A | BE NP | VP AND VP
+#    NP    -> P | AR Nom | Nom
+#    Nom   -> AN | AN Rel
+#    AN    -> N | A AN
+#    Rel   -> WHO VP | NP T
+#    N     -> "Ns" | "Np"
+#    I    -> "Is" | "Ip"
+#    T    -> "Ts" | "Tp"
+#    A     -> "A"
+#    P     -> "P"
+#    BE    -> "BEs" | "BEp"
+#    DO    -> "DOs" | "DOp"
+#    AR    -> "AR"
+#    WHO   -> "WHO"
+#    WHICH -> "WHICH"
+#    AND   -> "AND"
+#    QM    -> "?"
 
 def sem(tr):
     """translates a syntax tree into a logical lambda expression (in string form)"""
@@ -19,13 +38,48 @@ def sem(tr):
         return tr[0][0]
     elif (tr.label() == 'N'):
         return '(\\x.' + tr[0][0] + '(x))'  # \\ is escape sequence for \
-    elif  # add code here
-    
+    elif  (tr.label() == 'A'):
+        return '(\\x.' + tr[0][0] + '(x))'
+    elif (tr.label() == 'I'):
+        return '(\\x.' + tr[0][0] + '(x))'
+    elif (tr.label() == 'T'):
+        return '(\\x.\\y.' + tr[0][0] + '(y,x))'
+    elif (rule == 'Rel -> WHO VP'):
+        return '(\\x.( ' + sem(tr[1]) + ')(x))'
+    elif (rule == 'Rel -> NP T'):
+        return '(\\x.( exists y.(' + sem(tr[0]) + '(y) & ' + sem(tr[1]) + '(x, y))))'
+    elif (rule == 'AN -> N'):
+        return '(\\x.(' + sem(tr[0]) + ')(x))'
+    elif (rule == 'Nom -> AN Rel'):
+        return '(\\x.(' + sem(tr[0]) + '(x) & ' + sem(tr[1]) + '(x)))'
+    elif (rule == 'Nom -> AN'):
+        return '(\\x.(' + sem(tr[0]) + ') (x))'
+    elif (rule == 'NP -> Nom'):
+        return '(\\x.(' + sem(tr[0]) + ') (x))'
+    elif (rule == 'NP -> AR Nom'):
+        return '(\\x.(' + sem(tr[1]) + '(x)))'
+    elif (rule == 'VP -> VP AND VP'):
+        return '(\\x.(' + sem(tr[0]) + '(x) & ' + sem(tr[2]) + '(x)))'
+    elif (rule == 'VP -> BE NP'):
+        return '(\\x.(' + sem(tr[1]) + '(x)))'
+    elif (rule == 'VP -> BE A'):
+        return '(\\x.(' + sem(tr[1]) + ') (x))'
+    elif (rule == 'VP -> T NP'):
+        return '(\\x.( exists y.(' + sem(tr[1]) + '(y) & ' + sem(tr[0]) + '(y,x))))'
+    elif (rule == 'VP -> I'):
+        return '(\\x.(' + sem(tr[0]) + ') (x))'
+    elif (rule == 'QP -> VP'):
+        return '(\\x.(' + sem(tr[0]) + ')(x))'
+    elif (rule == 'QP -> DO NP T'):
+        return '(\\x.( exists y.(' + sem(tr[1]) + '(y) & ' + sem(tr[2]) + '(x, y))))' 
+    elif (rule == 'S -> WHO QP QM'):
+        return '(\\x.(' + sem(tr[1]) + ') (x))'
+    elif (rule == 'S -> WHICH Nom QP QM'):
+         return '(\\x.(' + sem(tr[1]) + '(x) & ' + sem(tr[2]) + '(x)))'    
     elif (rule == 'AN -> A AN'):
         return '(\\x.(' + sem(tr[0]) + '(x) & ' + sem(tr[1]) + '(x)))'
     elif (rule == 'NP -> P'):
-        return '(\\x.(x = ' + sem(tr[0]) + '))'
-    elif  # add more code here
+        return '(\\x.(x =' + sem(tr[0]) + '))'
 
 
 # Logic parser for lambda expressions

@@ -19,6 +19,8 @@ def add(lst, item):
         lst.insert(len(lst), item)
 
 
+corpus = set(brown.tagged_words())
+
 class Lexicon:
     """stores known word stems of various part-of-speech categories"""
     # add code here
@@ -35,32 +37,67 @@ class Lexicon:
 
     def getAll(self, cat):
         # convert to a set to remove duplicates and then convert to a list again to print
-        return self.lex[cat]
+        if (self.lex.has_key(cat)):
+            return self.lex[cat]
+        else:
+            return []
 
 
 class FactBase:
     """stores unary and binary relational facts"""
 
-    # def __init__(self):
-    #     self.binary = {}
-    #     self.unary = {}
+    def __init__(self):
+        self.binary = {}
+        self.unary = {}
 
-    # def addUnary(self, pred, e1):
-    #     if (self.unary[pred] is None){
-    #         self.unary
-    #     }
+    def addUnary(self, pred, e1):
+        if (not (self.unary.has_key(pred))):
+            self.unary[pred] = []
+        add(self.unary[pred], e1)
 
-    # def addBinary(self, pred, e1, e2):
+    def addBinary(self, pred, e1, e2):
+        if (not (self.binary.has_key(pred))):
+            self.binary[pred] = []
+        add(self.binary[pred], (e1,e2))
 
-    # def queryUnary(self, pred, e1):
+    def queryUnary(self, pred, e1):
+        if (self.unary.has_key(pred)):
+            return (e1 in self.unary[pred])
+        else:
+            return False
 
-    # def queryBinary(self, pred, e1, e2):
-
+    def queryBinary(self, pred, e1, e2):
+        if(self.binary.has_key(pred)):
+            return ((e1,e2) in self.binary[pred])
+        else:
+            return False
+        
 
 def verb_stem(s):
     """extracts the stem from the 3sg form of a verb, or returns empty string"""
-    """edit return value"""
-    return True
+    stem = ''
+    if (re.match("^has$", s)):
+        stem = 'have'    
+    elif (re.match("^[^aeiou]ies$", s)):
+        stem = s[:-1]
+    #any word ending in a y not preceded by a vowel
+    elif (re.match("^.*[^aeiou]ies$", s)):
+        stem = (s[:-3] + 'y')    
+    elif (re.match("^.*[aeiou]y$", s)):
+        stem = s[:-1]
+    elif (re.match("^.*y$",s[:-1])):
+        stem = s[:-1]    
+    elif (re.match("^.*(o|x|ch|sh|ss|zz)es$", s)):
+        stem = s[:-2]
+    elif (re.match("^.*es$", s)):
+        stem = s[:-1]
+    elif (re.match("^.*s$",s)):
+        stem = s[:-1]
+
+    if((stem, "VB") in corpus) or ((s, "VBZ") in corpus) or stem in ['have', 'do', 'are']:
+        return stem
+    else:
+        return ''
 
 
 def add_proper_name(w, lx):
@@ -110,5 +147,13 @@ if __name__ == "__main__":
     lx.add('Mary', 'P')
     print lx.getAll('P')
     print lx.getAll('T')
+    
+    fb = FactBase()
+    fb.addUnary("duck","John")
+    fb.addBinary("love","John","Mary")
+    fb.queryUnary("duck","John") # returns True
+    fb.queryBinary("love","Mary","John") # returns False)
+
+    print verb_stem("fixes")
 
 # End of PART A.

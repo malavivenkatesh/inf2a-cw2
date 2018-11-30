@@ -91,7 +91,18 @@ def N_phrase_num(tr):
         return tr[0][1]  # the s or p from Ns or Np
     elif (tr.label() == 'Nom'):
         return N_phrase_num(tr[0])
-    elif  # add code here
+    elif  (tr.label() == 'AN'):
+        if (tr[0].label() == 'A'):
+            return N_phrase_num(tr[1])
+        else:
+            return N_phrase_num(tr[0])
+    elif (tr.label() == 'NP'):
+        if (tr[0].label() == 'AR'):
+            return "s"
+        elif (tr[0].label() == 'P'):
+            return "s"
+        elif (tr[0].label() == 'Nom'):
+            return "p"
 
 def V_phrase_num(tr):
     """returns the number attribute of a verb-like tree, based on its head verb,
@@ -100,7 +111,21 @@ def V_phrase_num(tr):
         return tr[0][1]  # the s or p from Is,Ts or Ip,Tp
     elif (tr.label() == 'VP'):
         return V_phrase_num(tr[0])
-    elif  # add code here
+    elif  (tr.label() == 'BE'):
+        return tr[0][2]
+    elif  (tr.label() == 'DO'):
+        return tr[0][2]
+    elif  (tr.label() == 'Rel'):
+        if (tr[0].label == 'WHO'):
+            return V_phrase_num(tr[1])
+        elif (tr[0].label == 'NP'):
+            return V_phrase_num(tr[1])
+    elif  (tr.label() == 'QP'):         
+        if (tr[0].label() == 'VP'):
+            return V_phrase_num(tr[0])
+        elif(tr[0].label() == 'DO'):
+            return V_phrase_num(tr[0])
+
 
 def matches(n1,n2):
     return (n1==n2 or n1=='' or n2=='')
@@ -112,7 +137,17 @@ def check_node(tr):
         return (matches (N_phrase_num(tr[1]), V_phrase_num(tr[2])))
     elif (rule == 'NP -> AR Nom'):
         return (N_phrase_num(tr[1]) == 's')
-    elif  # add code here
+    elif (rule == 'NP -> AN Rel'):
+        return (matches (N_phrase_num(tr[0]), N_phrase_num(tr[1])))
+    elif (rule == 'NP -> T'):
+        return (matches (N_phrase_num(tr[0]), V_phrase_num(tr[1])))
+    elif (rule == 'VP -> VP AND VP'):
+        return (matches(V_phrase_num(tr[0]), V_phrase_num[tr[2]]))
+    elif (rule == 'VP -> BE NP'):
+        return (matches(V_phrase_num(tr[0]), N_phrase_num(tr[1])))
+    elif (rule == 'QP -> DO NP T'):
+        return (matches(V_phrase_num(tr[0]), N_phrase_num(tr[1])) and V_phrase_num(tr[2]) == "p")
+    else: return True
 
 def check_all_nodes(tr):
     """checks agreement constraints everywhere in tr"""
@@ -162,11 +197,12 @@ def restore_words(tr,wds):
 if __name__ == "__main__":
     #code for a simple testing, feel free to modify
     lx = Lexicon()
-    lx.add('John','P')
-    lx.add('like','T')
-    tr0 = all_valid_parses(lx, ['Who','likes','John','?'])[0]
-    tr = restore_words(tr0,['Who','likes','John','?'])
-    tr.draw()
+    # lx.add('John','P')
+    # lx.add('like','T')
+    # tr0 = all_valid_parses(lx, ['Who','does','John','like', '?'])
+    # tr0[0].draw()
+    # tr = restore_words(tr0,['Who','likes','John','?'])
+    # tr.draw()
 
 # End of PART C.
 
